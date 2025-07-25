@@ -1,0 +1,257 @@
+# Decentralized AI Model Registry and Ranking Platform
+
+A comprehensive Stacks blockchain smart contract that enables AI model registration, community-driven evaluation, reputation-based scoring, and decentralized governance of AI model quality rankings.
+
+## Overview
+
+This smart contract creates a decentralized platform where AI researchers and developers can register their models, receive community feedback, and participate in a reputation-based ranking system. The platform uses economic incentives through staking mechanisms to prevent spam and ensure quality participation.
+
+## Features
+###  Model Registration
+- Register AI models with detailed metadata
+- Support for 8 different AI model categories
+- IPFS content hash integration for model storage
+- Economic stake requirement to prevent spam
+
+###  Community Evaluation
+- Community-driven rating system (1-10 scale)
+- Weighted voting based on participant reputation
+- Optional feedback comments for detailed reviews
+- Anti-spam protection through duplicate vote prevention
+
+###  Reputation System
+- Dynamic reputation scoring for participants
+- Reputation weights influence voting power
+- Activity-based reputation accumulation
+- Quality score tracking
+
+###  Category-Based Rankings
+- Organized leaderboards by AI model category
+- Real-time ranking updates
+- Performance analytics tracking
+- Trending score calculations
+
+###  Economic Incentives
+- Staking mechanism for model registration (1 STX minimum)
+- Time-locked stake withdrawal (100 blocks)
+- Economic barriers to prevent spam
+- Reward system for quality participation
+
+## Supported AI Model Categories
+1. **Natural Language Processing** - Text analysis, chatbots, translation
+2. **Computer Vision** - Image recognition, object detection, visual AI
+3. **Recommendation Systems** - Collaborative filtering, content recommendations
+4. **Reinforcement Learning** - Game AI, robotics, decision making
+5. **Generative Models** - GANs, VAEs, text/image generation
+6. **Speech Recognition** - Voice processing, speech-to-text
+7. **Time Series Analysis** - Forecasting, trend analysis
+8. **Other Category** - Miscellaneous AI models
+
+## Contract Architecture
+
+### Data Structures
+
+#### Model Registry
+```clarity
+{
+  model-display-name: (string-ascii 100),
+  detailed-description: (string-utf8 500),
+  model-creator-address: principal,
+  assigned-category: (string-ascii 30),
+  content-hash-reference: (string-ascii 64),
+  accumulated-vote-count: uint,
+  cumulative-score-total: uint,
+  calculated-average-rating: uint,
+  required-stake-amount: uint,
+  registration-block-height: uint,
+  current-active-status: bool,
+  last-updated-block: uint
+}
+```
+#### Evaluation Records
+```clarity
+{
+  assigned-rating-score: uint,
+  evaluation-timestamp: uint,
+  optional-feedback-comment: (optional (string-utf8 200)),
+  evaluator-reputation-at-vote: uint
+}
+```
+#### Reputation Profiles
+```clarity
+{
+  accumulated-reputation-points: uint,
+  total-evaluations-submitted: uint,
+  total-models-contributed: uint,
+  quality-score-average: uint,
+  account-creation-block: uint
+}
+```
+## Key Functions
+### Public Functions
+#### `register-ai-model`
+Register a new AI model on the platform.
+
+**Parameters:**
+- `model-display-name`: Model name (max 100 chars)
+- `detailed-description`: Model description (max 500 chars)
+- `assigned-category`: One of the supported categories
+- `content-hash-reference`: IPFS hash (64 chars)
+
+**Requirements:**
+- Minimum 1 STX stake
+- Valid category
+- Unique model registration
+
+#### `submit-model-evaluation`
+Submit a community evaluation for a registered model.
+
+**Parameters:**
+- `target-model-identifier`: Model ID to evaluate
+- `assigned-rating-score`: Rating (1-10)
+- `optional-feedback-comment`: Optional comment (max 200 chars)
+
+**Requirements:**
+- Model must be active
+- No duplicate votes
+- Valid rating range
+
+#### `withdraw-model-stake`
+Withdraw staked tokens after lockup period.
+
+**Parameters:**
+- `target-model-identifier`: Model ID for stake withdrawal
+
+**Requirements:**
+- Must be model creator
+- Lockup period completed (100 blocks)
+
+### Read-Only Functions
+
+#### `fetch-model-details`
+Get complete information about a specific model.
+
+#### `fetch-user-evaluation`
+Retrieve a user's evaluation for a specific model.
+
+#### `fetch-reputation-profile`
+Get reputation profile for a participant.
+
+#### `fetch-category-leaderboard`
+Get ranked models for a specific category.
+
+#### `fetch-platform-statistics`
+Get overall platform statistics.
+
+## Economic Parameters
+
+| Parameter | Value | Description |
+|-----------|-------|-------------|
+| `minimum-registration-stake` | 1,000,000 µSTX (1 STX) | Required stake for model registration |
+| `stake-lockup-period` | 100 blocks | Waiting period before stake withdrawal |
+| `reputation-weight-multiplier` | 100 | Factor for reputation-based vote weighting |
+| `maximum-rating-score` | 10 | Highest possible rating |
+| `minimum-rating-score` | 1 | Lowest possible rating |
+
+## Error Codes
+
+| Code | Constant | Description |
+|------|----------|-------------|
+| 100 | `ERR-UNAUTHORIZED-ACCESS` | Unauthorized access attempt |
+| 101 | `ERR-MODEL-RECORD-NOT-FOUND` | Model not found |
+| 102 | `ERR-DUPLICATE-VOTE-ATTEMPT` | Duplicate vote attempt |
+| 103 | `ERR-INVALID-RATING-SCORE` | Invalid rating score |
+| 104 | `ERR-MODEL-ALREADY-REGISTERED` | Model already registered |
+| 105 | `ERR-INSUFFICIENT-STAKE-BALANCE` | Insufficient stake balance |
+| 106 | `ERR-INVALID-MODEL-CATEGORY` | Invalid model category |
+| 107 | `ERR-MODEL-DEACTIVATED-STATUS` | Model is deactivated |
+| 108 | `ERR-WITHDRAWAL-TIME-RESTRICTION` | Withdrawal time restriction |
+| 109 | `ERR-INVALID-STRING-LENGTH` | Invalid string length |
+| 110 | `ERR-INVALID-COMMENT-LENGTH` | Invalid comment length |
+
+## Usage Examples
+### Registering a New Model
+
+```clarity
+(contract-call? .ai-model-registry register-ai-model 
+  "GPT-4 Clone"
+  "Advanced language model for text generation and understanding"
+  "natural-language-processing"
+  "QmYourIPFSHashHere123456789012345678901234567890123456789012")
+```
+
+### Submitting an Evaluation
+```clarity
+(contract-call? .ai-model-registry submit-model-evaluation 
+  u1 
+  u8 
+  (some "Excellent performance on benchmark tests"))
+```
+
+### Querying Model Details
+
+```clarity
+(contract-call? .ai-model-registry fetch-model-details u1)
+```
+
+## Deployment Instructions
+
+1. **Prerequisites**
+   - Stacks CLI installed
+   - Testnet/Mainnet STX tokens for deployment
+   - Clarinet for local testing
+
+2. **Local Testing**
+   ```bash
+   clarinet console
+   ::deploy_contracts
+   ```
+
+3. **Contract Deployment**
+   ```bash
+   stx deploy_contract ai-model-registry contract.clar --testnet
+   ```
+
+4. **Platform Initialization**
+   ```clarity
+   (contract-call? .ai-model-registry initialize-platform)
+   ```
+
+## Security Considerations
+
+### Economic Security
+- Staking requirement prevents spam registration
+- Time-locked withdrawals prevent quick exit
+- Reputation weighting reduces Sybil attacks
+
+### Access Control
+- Owner-only administrative functions
+- Model creator permissions for withdrawal
+- Anti-duplicate voting mechanisms
+
+### Input Validation
+- String length restrictions
+- Category validation
+- Rating range enforcement
+- IPFS hash format validation
+
+## Governance
+
+The contract includes administrative functions for platform management:
+
+- **Model Deactivation**: Admins can deactivate models for policy violations
+- **Category Management**: Support for adding new AI model categories
+- **Parameter Updates**: Economic parameters can be adjusted through governance
+
+## Future Enhancements
+
+### Planned Features
+- **Advanced Ranking Algorithms**: More sophisticated scoring mechanisms
+- **Incentive Mechanisms**: Token rewards for quality evaluations
+- **Dispute Resolution**: Community-driven model dispute system
+- **Integration APIs**: External platform integration capabilities
+
+### Scalability Improvements
+- **Pagination**: Enhanced query functions with pagination
+- **Batch Operations**: Bulk model operations
+- **Performance Analytics**: Advanced model performance tracking
